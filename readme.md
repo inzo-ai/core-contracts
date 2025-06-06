@@ -29,7 +29,83 @@ The Inzo protocol is designed as a modular system of interacting smart contracts
 *   **Admin/Oracle/Deployer Address (for MVP functionality):** `0xeb10E960092F0B8FeDB5c8D64D726d602D089D18`
 
 ## Contract Details & Interactions
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant B as Telegram Bot
+    participant R as API Relayer
+    participant K as KYC Contract
+    participant N as Policy NFT
+    participant P as Policy Logic
+    participant C as Claim Processor
+    participant T as Treasury
 
+    Note over U,T: Phase 1: Onboarding & KYC
+    U->>B: /start_application
+    B->>U: Guide KYC steps
+    U->>B: Provides KYC info
+    B->>B: AI Agent processes KYC data
+    B->>R: POST /kyc-verification-result
+    R->>K: setKYCStatus()
+    K->>R: Transaction Receipt
+    R->>B: KYC Update Confirmation
+    B->>U: KYC Status Update
+
+    Note over U,T: Phase 2: Policy Issuance
+    U->>B: /insure_device
+    B->>B: AI calculates premium
+    U->>B: Confirms purchase
+    B->>R: POST /issue-policy
+    R->>P: createPolicy()
+    P->>N: mintPolicyNFT()
+    N->>P: policyNFTId
+    P->>T: depositPremium()
+    T->>P: Confirmation
+    P->>R: Transaction Receipt
+    R->>B: Policy Issued Confirmation
+    B->>U: Policy Issued
+
+    Note over U,T: Phase 3: Premium Payment
+    U->>B: /pay_premium
+    B->>B: AI verifies policy
+    U->>B: Confirms payment
+    B->>R: POST /record-premium
+    R->>P: recordPremiumPayment()
+    P->>T: depositPremium()
+    T->>P: Confirmation
+    P->>R: Transaction Receipt
+    R->>B: Payment Confirmation
+    B->>U: Premium Paid
+
+    Note over U,T: Phase 4: Claim Filing
+    U->>B: /file_claim
+    B->>R: POST /initiate-claim
+    R->>P: initiateClaimFiling()
+    Note over P: Emits ClaimForwardedToProcessor event
+    R->>B: Claim Filing Initiated
+    B->>U: Claim Filed
+
+    Note over U,T: Phase 5: Claim Assessment
+    Note over B: AI Agent processes evidence
+    B->>R: POST /submit-ai-assessment
+    R->>C: registerClaimForProcessing()
+    C->>R: claimProcessorId
+    R->>C: submitAIAssessment()
+    Note over C: Rules Engine runs
+    C->>R: Transaction Receipt
+    R->>B: Assessment Update
+    B->>U: Claim Status Updated
+
+    Note over U,T: Phase 6: Payout
+    R->>C: authorizeAndProcessPayout()
+    C->>T: processPayout()
+    T->>C: Payout Confirmation
+    C->>P: updatePolicyStatusAfterClaim()
+    P->>C: Confirmation
+    C->>R: Transaction Receipt
+    R->>B: Payout Processed
+    B->>U: Claim Paid
+```
 ### 1. `PolicyNFT.sol`
 
 *   **Purpose:** Implements the ERC721 standard to represent each insurance policy as a unique, ownable Non-Fungible Token. It serves as the definitive record of policy ownership and links to policy metadata.
