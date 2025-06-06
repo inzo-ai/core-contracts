@@ -4,9 +4,6 @@
 
 This repository contains the core Solidity smart contracts that form the on-chain backbone of the Inzo insurance platform. Our vision is to make insurance more accessible, fair, and automated.
 
-**Pitch Video:** [Link to Your Demo Video - *Coming Soon!*]
-**Hackathon Project Page (DoraHacks):** [Link to Your BUIDL Page]
-
 ## 🚀 The Inzo Vision: Problem & Solution
 
 Traditional insurance is often plagued by slow manual processes, opaque decision-making, high operational costs, and frustrating user experiences, especially during onboarding and claims.
